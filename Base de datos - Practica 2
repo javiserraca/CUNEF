@@ -1,5 +1,9 @@
 USE 020test;
 
+CREATE TABLE lugares(
+nombre_p VARCHAR(15),
+diametro DOUBLE,
+CONSTRAINT pk_lugares PRIMARY KEY (nombre_p));
 
 CREATE TABLE vuelo_espacial(
 id_cospar VARCHAR(50),
@@ -7,14 +11,19 @@ nombre_mision VARCHAR(50),
 inicio DATE,
 origen VARCHAR(50),
 destino VARCHAR(50),
-CONSTRAINT pk_vuelo PRIMARY KEY (id_cospar));
+CONSTRAINT pk_vuelo PRIMARY KEY (id_cospar),
+CONSTRAINT fk_origen FOREIGN KEY (origen)
+		REFERENCES lugares(nombre_p),
+CONSTRAINT fk_destino FOREIGN KEY (destino)
+		REFERENCES lugares(nombre_p));
 
 CREATE TABLE astronauta(
 id_astronauta INT,
 nombre VARCHAR(50),
 birthplace VARCHAR(50),
-diametro_birthplace DOUBLE,
-CONSTRAINT pk_astronauta PRIMARY KEY (id_astronauta));
+CONSTRAINT pk_astronauta PRIMARY KEY (id_astronauta),
+CONSTRAINT pk_birthplace FOREIGN KEY (birthplace)
+		REFERENCES lugares(nombre_p));
 
 CREATE TABLE tripulacion(
 id_astronauta INT,
@@ -24,32 +33,22 @@ CONSTRAINT fk_trip_vuelo FOREIGN KEY (id_cospar)
 CONSTRAINT fk_trip_astro FOREIGN KEY (id_astronauta)
 		REFERENCES astronauta(id_astronauta));
 
-
-CREATE TRIGGER ve_values AFTER INSERT ON vuelo_espacial
-FOR EACH ROW
-BEGIN
-	INSERT INTO tripulacion (id_cospar, id_astronauta) VALUES (NEW.id_cospar, NULL);
-END;
-
-CREATE TRIGGER a_values AFTER INSERT ON astronauta
-FOR EACH ROW
-BEGIN
-	INSERT INTO tripulacion (id_cospar, id_astronauta) VALUES (NULL, NEW.id_astronauta);
-END;
-
+INSERT INTO lugares (nombre_p, diametro)
+VALUES('Tierra', 12742),
+	('Luna', 3474.8);
 
 INSERT INTO vuelo_espacial (id_cospar, nombre_mision, inicio, origen, destino)
 VALUES ('1969-059A' ,'AS-506 (Apolo 11)', '1969-07-16', 'Tierra', 'Luna');
 
 INSERT INTO astronauta
-VALUES (1, 'Neil Armstrong', 'Tierra', 12742),
-		(2, 'Michael Collins', 'Tierra', 12742),
-		(3, 'Buzz Aldrin', 'Tierra', 12742);
+VALUES (1, 'Neil Armstrong', 'Tierra'),
+	(2, 'Michael Collins', 'Tierra'),
+	(3, 'Buzz Aldrin', 'Tierra');
 
 INSERT INTO tripulacion
 VALUES (1, '1969-059A'),
-		(2, '1969-059A'),
-		(3, '1969-059A');
+	(2, '1969-059A'),
+	(3, '1969-059A');
 
 SELECT * FROM vuelo_espacial;
 SELECT * FROM astronauta;
